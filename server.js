@@ -1,5 +1,5 @@
 // requiring all the
-require('dotenv').config()
+require('dotenv').config();
 const express=require("express");
 const mongoose=require("mongoose");
 const bodyParser=require("body-parser");
@@ -162,22 +162,26 @@ Room.updateOne({_id:roomID},{$push:{messages:mess}},function(err,success){
 })
 
 app.post("/users/new",(req,res)=>{
+    console.log("called");
     const userdet=new User({
         name:req.body.name,
         email:req.body.email,
         
     })
 
-    User.findOne({email:req.body.email}).then((results)=>{
-        console.log("here");
-        console.log(results);
-    })
-    userdet.save(function(err){
+    userdet.save(function(err,results){
+        // if(err)
+        // {
+        //     console.log(err);
+        // }
+        // else
+        // {
+        //     console.log(results);
+        // }
         if(err)
-        {
-            console.log(err);
-        }
+         console.log(err);
     })
+
 })
 
 app.post("/rooms/new",(req,res)=>{
