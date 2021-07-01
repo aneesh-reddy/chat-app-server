@@ -88,6 +88,11 @@ db.once("open",()=>{
                      );  
                     }  
                  }
+                 else
+                 {
+                     console.log("err");
+                 }
+
              })
 
         }
@@ -104,14 +109,15 @@ db.once("open",()=>{
          {
             
             User.findOne({_id:change.documentKey._id})
-            .populate("actrooms").
-            exec(function(err,room){
+            .populate("actrooms")
+            .exec(function(err,room){
                 if(err)
                 {
                     console.log(err);
                 }
-                else
+                else 
                 {
+                //   console.log(room.actrooms);
                    pusher.trigger("users","updated",{
                        document:room.actrooms
                    })
@@ -147,14 +153,15 @@ app.post("/messages/new/:roomid",(req,res)=>{
   }
   
 
-Room.updateOne({_id:roomID},{$push:{messages:mess}},function(err,success){
+Room.updateOne({_id:roomID},{$push:{messages:mess}},function(err){
      if(err)
      {
          console.log("error is updating messages");
+
      }
      else
      {
-        res.send("ok");
+        console.log("no error");
      }
  });
 
@@ -169,15 +176,7 @@ app.post("/users/new",(req,res)=>{
         
     })
 
-    userdet.save(function(err,results){
-        // if(err)
-        // {
-        //     console.log(err);
-        // }
-        // else
-        // {
-        //     console.log(results);
-        // }
+    userdet.save(function(err){
         if(err)
          console.log(err);
     })
@@ -185,7 +184,7 @@ app.post("/users/new",(req,res)=>{
 })
 
 app.post("/rooms/new",(req,res)=>{
-    console.log('rooms new');
+  
     const roomName =new Room({
         roomname:req.body.name
     })
@@ -195,9 +194,9 @@ app.post("/rooms/new",(req,res)=>{
         {
             res.send(err);
         }
-        else if(data)
+        else
         {
-          User.updateOne({email:usermail},{$push:{roomIds:data._id,actrooms:data._id}},function(err,success){
+          User.updateOne({email:usermail},{$push:{roomIds:data._id,actrooms:data._id}},function(err){
                 if(err)
                 {
                     console.log(err);
@@ -207,9 +206,10 @@ app.post("/rooms/new",(req,res)=>{
                 {   
                   console.log("success");
                 }
-            });
-          res.send(data._id);
+             })
         }
+        res.send(data._id);
+
     })
 })
 
@@ -222,10 +222,10 @@ app.post("/rooms/join",function(req,res){
         {
             console.log("error");
         }
-        else
+        else if(results)
         {
             console.log("room");
-            User.updateOne({email:target},{$push:{roomIds:roomId,actrooms:roomId}},function(err,success){
+            User.updateOne({email:target},{$push:{roomIds:roomId,actrooms:roomId}},function(err){
                 if(err)
                 {
                     console.log("error");
