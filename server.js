@@ -146,9 +146,11 @@ db.once("open",()=>{
                 //   console.log(room.actrooms);
                   let len=room.actrooms.length;
                   let pushdoc =room.actrooms[len-1];
+                  console.log(room.email);
                   
                    pusher2.trigger("users","updated",{
-                       document: pushdoc
+                       document: pushdoc,
+                       name:room.email
                    })
                    console.log("triggered once");
                 }
