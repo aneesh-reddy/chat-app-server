@@ -4,7 +4,7 @@ const express=require("express");
 const mongoose=require("mongoose");
 const bodyParser=require("body-parser");
 const Pusher = require("pusher");
-const cors =require("cors");
+// const cors =require("cors");
 const { json } = require("body-parser");
 
 
@@ -13,14 +13,22 @@ const { json } = require("body-parser");
 const app=express();
 app.use(express.urlencoded({extended:true}));
 const port =process.env.PORT||9000;
-const pusher = new Pusher({
-    appId: process.env.PUSHER_APPID,
-    key: process.env.PUSHER_KEY,
-    secret: process.env.PUSHER_SECRET,
-    cluster: "eu",
+const pusher1 = new Pusher({
+    appId: "1228309",
+    key: "98f4565f0f93c4a6621e",
+    secret: "6bf497d89f01ac7b28cc",
+    cluster: "ap2",
     useTLS: true
   });
 
+  const pusher2 = new Pusher({
+    appId: "1222523",
+    key: "81bb5776e0598a40551b",
+    secret: "daa1ac9fb399bf98e080",
+    cluster: "eu",
+    useTLS: true
+  });
+  
 //middleware
 app.use(express.json());
 app.use(cors());
@@ -66,14 +74,15 @@ db.once("open",()=>{
          {
              const roomDetails=change.fullDocument;
             console.log(roomDetails._id);
-            pusher.trigger("rooms","inserted",{
-                 name:roomDetails.name,
+            pusher2.trigger("rooms","inserted",{
+                 name:roomDetails.roomname,
                  _id:roomDetails._id
              });
       
          }
          else if(change.operationType==="update")
          {
+            
            
             const key=change.documentKey._id;
              Room.findOne({_id:key},function(err,results){
@@ -81,7 +90,7 @@ db.once("open",()=>{
                 {
                      const len=results.messages.length;
                      if(len!==0){
-                      pusher.trigger("rooms","updated",{
+                      pusher2.trigger("rooms","updated",{
                          data:results.messages[len-1]
                       }
                     
@@ -107,6 +116,7 @@ db.once("open",()=>{
     changeStream3.on("change",(change)=>{
        if(change.operationType==="update")
          {
+            console.log("updated");
             
             User.findOne({_id:change.documentKey._id})
             .populate("actrooms")
@@ -115,11 +125,11 @@ db.once("open",()=>{
                 {
                     console.log(err);
                 }
-                else 
+                else if(room)
                 {
                 //   console.log(room.actrooms);
-                   pusher.trigger("users","updated",{
-                       document:room.actrooms
+                   pusher1.trigger("users","updated",{
+                       document: room.actrooms
                    })
                 }
             })
@@ -130,9 +140,6 @@ db.once("open",()=>{
             console.log("change else ");
         }
     })
-
-
-
 });
 
 //api routes
