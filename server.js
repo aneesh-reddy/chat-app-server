@@ -4,7 +4,7 @@ const express=require("express");
 const mongoose=require("mongoose");
 const bodyParser=require("body-parser");
 const Pusher = require("pusher");
-// const cors =require("cors");
+const cors =require("cors");
 const { json } = require("body-parser");
 
 
