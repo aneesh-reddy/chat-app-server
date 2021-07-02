@@ -13,6 +13,8 @@ const { json } = require("body-parser");
 const app=express();
 app.use(express.urlencoded({extended:true}));
 const port =process.env.PORT||9000;
+
+// pusher 1 -> mumbai cluster -> users 
 const pusher1 = new Pusher({
     appId: "1228309",
     key: "98f4565f0f93c4a6621e",
@@ -20,6 +22,8 @@ const pusher1 = new Pusher({
     cluster: "ap2",
     useTLS: true
   });
+
+// pusher 2 -> europe cluster -> rooms
 
   const pusher2 = new Pusher({
     appId: "1222523",
