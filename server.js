@@ -109,11 +109,12 @@ db.once("open",()=>{
                 {
                      const len=results.messages.length;
                      if(len!==0){
-                      pusher3.trigger("rooms","updated",{
+                        //  console.log(key);
+                        //  console.log(results.messages[len-1]);
+                       pusher3.trigger("rooms","updated",{
                          data:results.messages[len-1],
                          roomid:key
                       }
-                    
                      );  
                     }  
                  }
