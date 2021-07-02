@@ -32,6 +32,16 @@ const pusher1 = new Pusher({
     cluster: "eu",
     useTLS: true
   });
+
+  //pusher 3
+
+  const pusher3 = new Pusher({
+    appId: "1226369",
+    key: "c198e52dedc998546e92",
+    secret: "ac06b8675870ef2ad693",
+    cluster: "eu",
+    useTLS: true
+  });
   
 //middleware
 app.use(express.json());
@@ -74,11 +84,12 @@ db.once("open",()=>{
     const changeStream2=rmCollection.watch();
     
     changeStream2.on("change",(change)=>{
+        console.log(change.operationType);
         if(change.operationType==="insert")
          {
              const roomDetails=change.fullDocument;
-            console.log(roomDetails._id);
-            pusher2.trigger("rooms","inserted",{
+            // console.log(roomDetails._id);
+            pusher1.trigger("rooms","inserted",{
                  name:roomDetails.roomname,
                  _id:roomDetails._id
              });
@@ -90,21 +101,22 @@ db.once("open",()=>{
            
             const key=change.documentKey._id;
              Room.findOne({_id:key},function(err,results){
-                 if(!err)
+                 if(err)
+                 {
+                     console.log(err);
+                 }
+                 else 
                 {
                      const len=results.messages.length;
                      if(len!==0){
-                      pusher2.trigger("rooms","updated",{
+                      pusher3.trigger("rooms","updated",{
                          data:results.messages[len-1]
                       }
                     
                      );  
                     }  
                  }
-                 else
-                 {
-                     console.log("err");
-                 }
+               
 
              })
 
@@ -129,12 +141,16 @@ db.once("open",()=>{
                 {
                     console.log(err);
                 }
-                else if(room)
+                else
                 {
                 //   console.log(room.actrooms);
-                   pusher1.trigger("users","updated",{
-                       document: room.actrooms
+                  let len=room.actrooms.length;
+                  let pushdoc =room.actrooms[len-1];
+                  
+                   pusher2.trigger("users","updated",{
+                       document: pushdoc
                    })
+                   console.log("triggered once");
                 }
             })
 
