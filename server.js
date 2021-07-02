@@ -110,7 +110,8 @@ db.once("open",()=>{
                      const len=results.messages.length;
                      if(len!==0){
                       pusher3.trigger("rooms","updated",{
-                         data:results.messages[len-1]
+                         data:results.messages[len-1],
+                         roomid:key
                       }
                     
                      );  
@@ -318,5 +319,5 @@ app.get("/rooms/messages/:roomId",(req,res)=>{
 
 //listen
 app.listen(port,function(req,res){
-    console.log("listening on port 9000 ");
+    console.log("listening on port "+port);
 })
