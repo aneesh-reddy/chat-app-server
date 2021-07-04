@@ -6,6 +6,7 @@ const bodyParser=require("body-parser");
 const Pusher = require("pusher");
 const cors =require("cors");
 const { json } = require("body-parser");
+const encrypt=require("mongoose-encryption");
 
 
 //app config
@@ -16,9 +17,9 @@ const port =process.env.PORT||9000;
 
 // pusher 1 -> mumbai cluster -> users 
 const pusher1 = new Pusher({
-    appId: "1228309",
-    key: "98f4565f0f93c4a6621e",
-    secret: "6bf497d89f01ac7b28cc",
+    appId: process.env.PUSHER1_APPID,
+    key: process.env.PUSHER1_KEY,
+    secret:process.env.PUSHER1_SECRET,
     cluster: "ap2",
     useTLS: true
   });
@@ -26,9 +27,9 @@ const pusher1 = new Pusher({
 // pusher 2 -> europe cluster -> rooms
 
   const pusher2 = new Pusher({
-    appId: "1222523",
-    key: "81bb5776e0598a40551b",
-    secret: "daa1ac9fb399bf98e080",
+    appId: process.env.PUSHER2_APPID,
+    key: process.env.PUSHER2_KEY,
+    secret: process.env.PUSHER2_SECRET,
     cluster: "eu",
     useTLS: true
   });
@@ -36,9 +37,9 @@ const pusher1 = new Pusher({
   //pusher 3
 
   const pusher3 = new Pusher({
-    appId: "1226369",
-    key: "c198e52dedc998546e92",
-    secret: "ac06b8675870ef2ad693",
+    appId: process.env.PUSHER3_APPID,
+    key: process.env.PUSHER3_KEY,
+    secret: process.env.PUSHER3_SECRET,
     cluster: "eu",
     useTLS: true
   });
@@ -60,10 +61,13 @@ const whatsappDBSchema= new mongoose.Schema({
    
 })
 
+
 const roomSchema=new mongoose.Schema({
     roomname:String,
     messages:[whatsappDBSchema]
 })
+
+// roomSchema.plugin(encrypt,{secret:process.env.LONG_STRING,encryptedFields:['messages.message']});
 
 const userSchema=new mongoose.Schema({
     name:String,
@@ -100,28 +104,15 @@ db.once("open",()=>{
             
            
             const key=change.documentKey._id;
-             Room.findOne({_id:key},function(err,results){
-                 if(err)
-                 {
-                     console.log(err);
-                 }
-                 else 
-                {
-                     const len=results.messages.length;
-                     if(len!==0){
-                        //  console.log(key);
-                        //  console.log(results.messages[len-1]);
-                       pusher3.trigger("rooms","updated",{
-                         data:results.messages[len-1],
-                         roomid:key
-                      }
-                     );  
-                    }  
-                 }
-               
-
+             Room.findOne({_id:key}).then((response)=>{
+                 let len=response.messages.length;
+                 pusher3.trigger('rooms','updated',{
+                     doc:response.messages[len-1],
+                     roomid:key
+                 })
+             }).catch((err)=>{
+                 console.log(err);
              })
-
         }
         else
         {
@@ -312,7 +303,7 @@ app.get("/rooms/messages/:roomId",(req,res)=>{
         }
         else
         { 
-            if(results)
+        
              res.send(results.messages);
         }
     })
